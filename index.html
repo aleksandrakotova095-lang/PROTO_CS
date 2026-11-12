@@ -417,7 +417,7 @@
   <div class="bg-grid"></div>
   <div class="bg-glow"></div>
 
-  <!-- Две кнопки на верхней панели -->
+  <!-- Панель управления с кнопками Редактировать и Поделиться -->
   <div class="top-bar">
     <button class="btn-hud" id="openEditBtn" type="button">Редактировать</button>
     <button class="btn-hud accent" id="shareBtn" type="button">Поделиться</button>
@@ -648,7 +648,7 @@
       showToast('Сохранено');
     });
 
-    // Кнопка поделиться: копирует чистый адрес страницы без огромных хвостов
+    // Копирование чистой ссылки на сайт по кнопке «Поделиться»
     els.shareBtn.addEventListener('click', () => {
       const cleanUrl = window.location.origin + window.location.pathname;
       navigator.clipboard.writeText(cleanUrl).then(() => {
