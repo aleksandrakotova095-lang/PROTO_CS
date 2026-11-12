@@ -34,7 +34,7 @@
       user-select: none;
     }
 
-    /* Локальная картинка Img/fon.jpg + затемнение */
+    /* Фоновая картинка Img/fon.jpg + затемнение */
     .bg-image {
       position: fixed;
       inset: 0;
@@ -71,7 +71,7 @@
       opacity: 0.35;
     }
 
-    /* Верхняя панель управления (без смайликов) */
+    /* Верхняя панель управления */
     .top-bar {
       position: fixed;
       top: 18px;
@@ -417,7 +417,6 @@
   <div class="bg-grid"></div>
   <div class="bg-glow"></div>
 
-  <!-- Кнопки без смайликов -->
   <div class="top-bar">
     <button class="btn-hud" id="openEditBtn" type="button">Редактировать</button>
     <button class="btn-hud accent" id="shareBtn" type="button">Поделиться</button>
@@ -465,7 +464,6 @@
     </section>
   </main>
 
-  <!-- Модальное окно настроек -->
   <div class="modal-backdrop" id="editModal">
     <div class="modal">
       <h2>Настройка визитки CS2</h2>
@@ -505,7 +503,7 @@
       </div>
 
       <div class="field">
-        <label>Ссылка на аватар (для максимально короткой ссылки)</label>
+        <label>Ссылка на аватар (опционально)</label>
         <input type="url" id="inputAvatarUrl" placeholder="https://..." />
       </div>
 
@@ -565,7 +563,6 @@
       setTimeout(() => els.toast.classList.remove('show'), 2400);
     }
 
-    // Компактное GZIP + Base64URL кодирование для короткой ссылки
     async function compressData(obj) {
       const compact = {};
       for (const k of Object.keys(defaultData)) {
@@ -657,7 +654,6 @@
       }
     }
 
-    // Сильное сжатие локального фото (72x72 WebP), чтобы ссылка оставалась короткой
     els.avatarTrigger.addEventListener('click', () => els.avatarInput.click());
     els.avatarInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -720,7 +716,7 @@
     els.shareBtn.addEventListener('click', async () => {
       await persist();
       navigator.clipboard.writeText(window.location.href).then(() => {
-        showToast('Короткая ссылка скопирована');
+        showToast('Ссылка скопирована');
       });
     });
 
