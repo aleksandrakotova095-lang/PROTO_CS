@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet" />
   <style>
+    /* =================================================_
+       1. ПЕРЕМЕННЫЕ И БАЗОВЫЕ СТИЛИ
+       ================================================= */
     :root {
       --accent: #E4871B;
       --accent-glow: rgba(228, 135, 27, 0.35);
@@ -34,7 +37,9 @@
       user-select: none;
     }
 
-    /* Фоновая картинка Img/fon.jpg + затемнение */
+    /* =================================================_
+       2. ФОНОВЫЕ СЛОИ
+       ================================================= */
     .bg-image {
       position: fixed;
       inset: 0;
@@ -48,7 +53,6 @@
       transform: scale(1.02);
     }
 
-    /* Тактическая сетка CS2 */
     .bg-grid {
       position: fixed;
       inset: 0;
@@ -71,7 +75,9 @@
       opacity: 0.35;
     }
 
-    /* Верхняя панель управления */
+    /* =================================================_
+       3. ПАНЕЛЬ УПРАВЛЕНИЯ (HUD)
+       ================================================= */
     .top-bar {
       position: fixed;
       top: 18px;
@@ -116,7 +122,9 @@
       filter: brightness(1.1);
     }
 
-    /* Центрированный контейнер */
+    /* =================================================_
+       4. КАРТОЧКА-ВИЗИТКА
+       ================================================= */
     .viewport {
       position: relative;
       z-index: 10;
@@ -128,7 +136,6 @@
       padding: 20px;
     }
 
-    /* Карточка-визитка */
     .card {
       position: relative;
       width: 100%;
@@ -311,7 +318,9 @@
       background: rgba(255, 255, 255, 0.08);
     }
 
-    /* Модальное окно */
+    /* =================================================_
+       5. МОДАЛЬНОЕ ОКНО И УВЕДОМЛЕНИЯ
+       ================================================= */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -413,16 +422,17 @@
 </head>
 <body>
 
+  <!-- ФОНОВЫЕ СЛОИ -->
   <div class="bg-image"></div>
   <div class="bg-grid"></div>
   <div class="bg-glow"></div>
 
-  <!-- Панель управления с кнопками Редактировать и Поделиться -->
+  <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
   <div class="top-bar">
-    <button class="btn-hud" id="openEditBtn" type="button">Редактировать</button>
-    <button class="btn-hud accent" id="shareBtn" type="button">Поделиться</button>
+    <button class="btn-hud accent" id="openEditBtn" type="button">Редактировать</button>
   </div>
 
+  <!-- ОСНОВНОЙ КОНТЕЙНЕР С ВИЗИТКОЙ -->
   <main class="viewport">
     <section class="card">
       <div class="card-header-tag">
@@ -465,6 +475,7 @@
     </section>
   </main>
 
+  <!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК -->
   <div class="modal-backdrop" id="editModal">
     <div class="modal">
       <h2>Настройка визитки CS2</h2>
@@ -510,8 +521,10 @@
     </div>
   </div>
 
-  <div class="toast" id="toast">Ссылка скопирована</div>
+  <!-- УВЕДОМЛЕНИЕ (TOAST) -->
+  <div class="toast" id="toast">Сохранено</div>
 
+  <!-- СКРИПТЫ ЛОГИКИ -->
   <script>
     const defaultAvatarSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23161b24'/><circle cx='50' cy='38' r='18' fill='%23E4871B'/><path d='M20 88 C20 66, 80 66, 80 88' fill='%23E4871B'/></svg>";
 
@@ -542,7 +555,6 @@
       openEditBtn: document.getElementById('openEditBtn'),
       closeModalBtn: document.getElementById('closeModalBtn'),
       saveModalBtn: document.getElementById('saveModalBtn'),
-      shareBtn: document.getElementById('shareBtn'),
       toast: document.getElementById('toast'),
       inputNick: document.getElementById('inputNick'),
       inputRole: document.getElementById('inputRole'),
@@ -646,14 +658,6 @@
       persist();
       els.editModal.classList.remove('open');
       showToast('Сохранено');
-    });
-
-    // Копирование чистой ссылки на сайт по кнопке «Поделиться»
-    els.shareBtn.addEventListener('click', () => {
-      const cleanUrl = window.location.origin + window.location.pathname;
-      navigator.clipboard.writeText(cleanUrl).then(() => {
-        showToast('Ссылка на сайт скопирована');
-      });
     });
 
     loadState();
