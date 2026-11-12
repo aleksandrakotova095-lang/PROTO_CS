@@ -417,6 +417,7 @@
   <div class="bg-grid"></div>
   <div class="bg-glow"></div>
 
+  <!-- Две кнопки на верхней панели -->
   <div class="top-bar">
     <button class="btn-hud" id="openEditBtn" type="button">Редактировать</button>
     <button class="btn-hud accent" id="shareBtn" type="button">Поделиться</button>
@@ -502,19 +503,14 @@
         <input type="url" id="inputTrade" placeholder="https://steamcommunity.com/tradeoffer/new/..." />
       </div>
 
-      <div class="field">
-        <label>Ссылка на аватар (опционально)</label>
-        <input type="url" id="inputAvatarUrl" placeholder="https://..." />
-      </div>
-
       <div class="modal-actions">
         <button class="btn-hud" id="closeModalBtn" type="button">Отмена</button>
-        <button class="btn-hud accent" id="saveModalBtn" type="button">Применить</button>
+        <button class="btn-hud accent" id="saveModalBtn" type="button">Сохранить</button>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">Скопировано</div>
+  <div class="toast" id="toast">Ссылка скопирована</div>
 
   <script>
     const defaultAvatarSvg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23161b24'/><circle cx='50' cy='38' r='18' fill='%23E4871B'/><path d='M20 88 C20 66, 80 66, 80 88' fill='%23E4871B'/></svg>";
@@ -553,67 +549,17 @@
       inputStatus: document.getElementById('inputStatus'),
       inputBio: document.getElementById('inputBio'),
       inputSteam: document.getElementById('inputSteam'),
-      inputTrade: document.getElementById('inputTrade'),
-      inputAvatarUrl: document.getElementById('inputAvatarUrl')
+      inputTrade: document.getElementById('inputTrade')
     };
 
     function showToast(msg) {
       els.toast.textContent = msg;
       els.toast.classList.add('show');
-      setTimeout(() => els.toast.classList.remove('show'), 2400);
+      setTimeout(() => els.toast.classList.remove('show'), 2000);
     }
 
-    async function compressData(obj) {
-      const compact = {};
-      for (const k of Object.keys(defaultData)) {
-        if (obj[k] && obj[k] !== defaultData[k]) {
-          compact[k] = obj[k];
-        }
-      }
-      const json = JSON.stringify(compact);
-      if (json === '{}') return '';
-
-      if ('CompressionStream' in window) {
-        const stream = new Blob([json]).stream().pipeThrough(new CompressionStream('deflate-raw'));
-        const buf = await new Response(stream).arrayBuffer();
-        const bytes = new Uint8Array(buf);
-        let bin = '';
-        for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-        return 'z' + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-      }
-      return 'j' + btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    }
-
-    async function decompressData(str) {
-      try {
-        const mode = str[0];
-        let b64 = str.slice(1).replace(/-/g, '+').replace(/_/g, '/');
-        while (b64.length % 4) b64 += '=';
-        const bin = atob(b64);
-
-        if (mode === 'z' && 'DecompressionStream' in window) {
-          const bytes = new Uint8Array(bin.length);
-          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-          const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-          const text = await new Response(stream).text();
-          return JSON.parse(text);
-        }
-        return JSON.parse(decodeURIComponent(escape(bin)));
-      } catch (e) {
-        return null;
-      }
-    }
-
-    async function loadState() {
-      const hash = window.location.hash;
-      if (hash && hash.startsWith('#c=')) {
-        const parsed = await decompressData(hash.slice(3));
-        if (parsed) {
-          state = { ...defaultData, ...parsed };
-          return;
-        }
-      }
-      const saved = localStorage.getItem('cs2_card_v3');
+    function loadState() {
+      const saved = localStorage.getItem('cs2_card_local');
       if (saved) {
         try {
           state = { ...defaultData, ...JSON.parse(saved) };
@@ -644,14 +590,8 @@
       }
     }
 
-    async function persist() {
-      localStorage.setItem('cs2_card_v3', JSON.stringify(state));
-      const token = await compressData(state);
-      if (token) {
-        history.replaceState(null, '', '#c=' + token);
-      } else {
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-      }
+    function persist() {
+      localStorage.setItem('cs2_card_local', JSON.stringify(state));
     }
 
     els.avatarTrigger.addEventListener('click', () => els.avatarInput.click());
@@ -661,9 +601,9 @@
       const reader = new FileReader();
       reader.onload = (ev) => {
         const img = new Image();
-        img.onload = async () => {
+        img.onload = () => {
           const canvas = document.createElement('canvas');
-          const size = 72;
+          const size = 96;
           canvas.width = size;
           canvas.height = size;
           const ctx = canvas.getContext('2d');
@@ -671,9 +611,9 @@
           const sx = (img.width - minSide) / 2;
           const sy = (img.height - minSide) / 2;
           ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
-          state.a = canvas.toDataURL('image/webp', 0.55);
+          state.a = canvas.toDataURL('image/webp', 0.7);
           render();
-          await persist();
+          persist();
           showToast('Аватар обновлён');
         };
         img.src = ev.target.result;
@@ -688,7 +628,6 @@
       els.inputBio.value = state.b;
       els.inputSteam.value = state.u;
       els.inputTrade.value = state.t;
-      els.inputAvatarUrl.value = state.a.startsWith('http') ? state.a : '';
       els.editModal.classList.add('open');
     });
 
@@ -696,34 +635,29 @@
       els.editModal.classList.remove('open');
     });
 
-    els.saveModalBtn.addEventListener('click', async () => {
+    els.saveModalBtn.addEventListener('click', () => {
       state.n = els.inputNick.value.trim() || 'PLAYER';
       state.r = els.inputRole.value.trim() || 'CS2 PLAYER';
       state.s = els.inputStatus.value;
       state.b = els.inputBio.value.trim();
       state.u = els.inputSteam.value.trim() || 'https://steamcommunity.com/';
       state.t = els.inputTrade.value.trim() || state.u;
-      const avatarUrl = els.inputAvatarUrl.value.trim();
-      if (avatarUrl) {
-        state.a = avatarUrl;
-      }
       render();
-      await persist();
+      persist();
       els.editModal.classList.remove('open');
       showToast('Сохранено');
     });
 
-    els.shareBtn.addEventListener('click', async () => {
-      await persist();
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        showToast('Ссылка скопирована');
+    // Кнопка поделиться: копирует чистый адрес страницы без огромных хвостов
+    els.shareBtn.addEventListener('click', () => {
+      const cleanUrl = window.location.origin + window.location.pathname;
+      navigator.clipboard.writeText(cleanUrl).then(() => {
+        showToast('Ссылка на сайт скопирована');
       });
     });
 
-    (async () => {
-      await loadState();
-      render();
-    })();
+    loadState();
+    render();
   </script>
 </body>
 </html>
